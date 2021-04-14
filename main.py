@@ -12,6 +12,8 @@ archive_domain = 'CameraRollDomain' # The archive domain - the application in qu
 restore_timestamps_via_exif = False # Try to use exif tags to restore file timestamps?
 exif_filetypes = ['jpg','jpeg','tif','tiff']
 debug_restore_file_count = 4 # Set to 0 or Null if not debugging!
+verbose = True # Print extra diagnostics (True / False)
+testmode = True # Only print, don't actually copy files
 
 ############ BEGIN PROGRAM #############
 
@@ -35,6 +37,10 @@ if restore_timestamps_via_exif:
         return Image.open(path).getexif()[36867]
 """
 
+## Functions
+verboseprint = print if (verbose or testmode) else lambda *a, **k: None # Prints if the "verbose" flag is true, otherwise nothing.
+
+
 ## Variable Initalization
 
 # Split off the archive_path_match string into two - one for cleaning up file names, one for the SQL query
@@ -55,7 +61,7 @@ db_path = Path(backup_base_path,database_filename)
 
 # Just a little diagnostic info
 file_info = os.stat(db_path)
-print(f'DB Size: {file_info.st_size/1024/1024:.1f}MB')
+verboseprint(f'DB Size: {file_info.st_size/1024/1024:.1f}MB')
 
 # 'Connect' to SQLite DB
 con = sqlite3.connect(db_path)
@@ -76,10 +82,10 @@ for row in cur.execute(base_query, query_fill_tuple):
     cur_file_relpath = row['relativePath']
     cur_file_basename = cur_file_relpath.replace(archive_path_match_base,'')
     
-    print("\nFilename: " + row['relativePath'] + " - Hash/ID: " + row['fileID'])
+    verboseprint("\nFilename: " + row['relativePath'] + " - Hash/ID: " + row['fileID'])
     
     source_file = Path(backup_base_path,cur_file_source_subdir,cur_file_id)
     file_info = os.stat(source_file)
-    print(f'Target Name: {cur_file_basename} - File size: {file_info.st_size/1024/1024:.1f}MB')
+    verboseprint(f'Target Name: {cur_file_basename} - File size: {file_info.st_size/1024/1024:.1f}MB')
 
-print("lol debug")
+verboseprint("lol debug")
