@@ -19,9 +19,7 @@ debug_restore_file_count = 15 # Set to 0 or Null if not debugging!
 
 database_filename = 'manifest.db' # SQLite DB filename
 
-#example_query = '''SELECT "_rowid_",* FROM "main"."Files" WHERE "domain" LIKE '%CameraRollDomain%' LIMIT 0, 10;'''
-#example_query = '''SELECT "_rowid_",* FROM "main"."Files" WHERE "domain" LIKE '%CameraRollDomain%' AND "relativePath" LIKE '%Media/DCIM/100APPLE/%' LIMIT 0, 15;'''
-example_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE '%CameraRollDomain%' AND "relativePath" LIKE '%Media/DCIM/100APPLE/%' LIMIT 0, 15;'''
+#example_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE '%CameraRollDomain%' AND "relativePath" LIKE '%Media/DCIM/100APPLE/%' LIMIT 0, 15;'''
 
 base_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE ? AND "relativePath" LIKE ? LIMIT 0, 15;'''
 
@@ -61,7 +59,6 @@ con = sqlite3.connect(db_path)
 
 con.row_factory = sqlite3.Row
 cur = con.cursor()
-#cur.execute(example_query)
 # Tuple for the query - to fill in to limit SQL injection. The "domain" and the path match ("relativePath")
 query_fill_tuple=(archive_domain,archive_path_match_sql)
 cur.execute(base_query, query_fill_tuple)
@@ -71,15 +68,11 @@ cur_file_id = one_row['fileID']
 cur_file_source_subdir = cur_file_id[0:2] # The two-character directory that the backup file is stored in. e.g. 'ef/ef0313281238123'
 cur_file_relpath = one_row['relativePath']
 cur_file_basename = cur_file_relpath.replace(archive_path_match_base,'')
-#print("One Row, 'raw' below")
-#print(one_row)
+
 print("\nFilename: " + one_row['relativePath'] + " - Hash/ID: " + one_row['fileID'])
-#print("\nOne row, unicode decoded maybe?" + str(one_row[0].decode('utf-8')))
 
 source_file = Path(backup_base_path,cur_file_source_subdir,cur_file_id)
 file_info = os.stat(source_file)
 print(f'Target Name: {cur_file_basename} - File size: {file_info.st_size/1024/1024:.1f}MB')
 
-
 print("lol debug")
-# SELECT "_rowid_",* FROM "main"."Files" WHERE "domain" LIKE '%CameraRollDomain%' ESCAPE '\' LIMIT 0, 49999;
