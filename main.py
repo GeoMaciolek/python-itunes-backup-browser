@@ -4,8 +4,8 @@
 backup_base_path = 'F:/3f01edfbff9f017dc2eb6ff5782333ad9d7278fe' # The path to your backup folder. 
 restore_path = 'F:/ipad_restore' # Where you want to restore the data.
 
-# Source archive (backup) details - as from the archive database
-archive_path_match = 'Media/DCIM/100APPLE/' # The beginning part of the archive path as defined in the backup, e.g. Media/DCIM/100APPLE/
+# Source archive (backup) details - as from the archive database. Note: % is a SQL wildcard
+archive_path_match = 'Media/DCIM/100APPLE/%' # The beginning part ofthe archive path as defined in the backup, e.g. Media/DCIM/100APPLE/%
 archive_domain = 'CameraRollDomain' # The archive domain - the application in question.
 
 # Other settings
@@ -23,7 +23,7 @@ database_filename = 'manifest.db' # SQLite DB filename
 #example_query = '''SELECT "_rowid_",* FROM "main"."Files" WHERE "domain" LIKE '%CameraRollDomain%' AND "relativePath" LIKE '%Media/DCIM/100APPLE/%' LIMIT 0, 15;'''
 example_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE '%CameraRollDomain%' AND "relativePath" LIKE '%Media/DCIM/100APPLE/%' LIMIT 0, 15;'''
 
-base_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE '%?%' AND "relativePath" LIKE '%?%' LIMIT 0, 15;'''
+base_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE ? AND "relativePath" LIKE ? LIMIT 0, 15;'''
 
 ### Script Start
 
@@ -49,7 +49,10 @@ con = sqlite3.connect(db_path)
 
 cur = con.cursor()
 #cur.execute(example_query)
-cur.execute(example_query,archive_domain,archive_path_match)
+query_fill_tuple=(archive_domain,archive_path_match)
+cur.execute(base_query, query_fill_tuple)
+
+
 
 one_row = cur.fetchone()
 print("One Row, 'raw' below")
