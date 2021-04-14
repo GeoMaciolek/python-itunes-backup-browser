@@ -15,13 +15,27 @@ debug_restore_file_count = 4 # Set to 0 or Null if not debugging!
 
 ############ BEGIN PROGRAM #############
 
-### Constants
+## Constants
 
 database_filename = 'manifest.db' # SQLite DB filename
 
 #example_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE '%CameraRollDomain%' AND "relativePath" LIKE '%Media/DCIM/100APPLE/%' LIMIT 0, 15;'''
 
 base_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE ? AND "relativePath" LIKE ? LIMIT 0,?;'''
+
+
+## Imports (and related functions as needed)
+import os, sqlite3
+
+from pathlib import Path # So we can use sane, cross-patform paths
+"""
+if restore_timestamps_via_exif:
+    from PIL import Image
+    def get_date_taken(path): # A quick function to get the date
+        return Image.open(path).getexif()[36867]
+"""
+
+## Variable Initalization
 
 # Split off the archive_path_match string into two - one for cleaning up file names, one for the SQL query
 if not archive_path_match[-1] == '%':
@@ -35,18 +49,7 @@ else:
     archive_path_match_base = archive_path_match[:-1]
 
 
-### Script Start
-
-# Imports (and related functions as needed
-from pathlib import Path # So we can use sane paths
-import os, sqlite3
-
-"""
-if restore_timestamps_via_exif:
-    from PIL import Image
-    def get_date_taken(path): # A quick function to get the date
-        return Image.open(path).getexif()[36867]
-"""
+## Begin
 
 db_path = Path(backup_base_path,database_filename)
 
@@ -72,9 +75,9 @@ for row in cur.execute(base_query, query_fill_tuple):
     cur_file_source_subdir = cur_file_id[0:2] # The two-character directory that the backup file is stored in. e.g. 'ef/ef0313281238123'
     cur_file_relpath = row['relativePath']
     cur_file_basename = cur_file_relpath.replace(archive_path_match_base,'')
-
+    
     print("\nFilename: " + row['relativePath'] + " - Hash/ID: " + row['fileID'])
-
+    
     source_file = Path(backup_base_path,cur_file_source_subdir,cur_file_id)
     file_info = os.stat(source_file)
     print(f'Target Name: {cur_file_basename} - File size: {file_info.st_size/1024/1024:.1f}MB')
