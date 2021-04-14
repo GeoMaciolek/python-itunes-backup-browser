@@ -31,10 +31,12 @@ base_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" 
 from pathlib import Path # So we can use sane paths
 import os, sqlite3
 
+"""
 if restore_timestamps_via_exif:
     from PIL import Image
     def get_date_taken(path): # A quick function to get the date
         return Image.open(path).getexif()[36867]
+"""
 
 db_path = Path(backup_base_path,database_filename)
 
