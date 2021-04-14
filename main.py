@@ -11,7 +11,7 @@ archive_domain = 'CameraRollDomain' # The archive domain - the application in qu
 # Other settings
 restore_timestamps_via_exif = False # Try to use exif tags to restore file timestamps?
 exif_filetypes = ['jpg','jpeg','tif','tiff']
-debug_restore_file_count = 15 # Set to 0 or Null if not debugging!
+debug_restore_file_count = 4 # Set to 0 or Null if not debugging!
 
 ############ BEGIN PROGRAM #############
 
@@ -67,18 +67,16 @@ else:
     limit_statement = str(debug_restore_file_count)
 
 query_fill_tuple=(archive_domain,archive_path_match_sql,limit_statement)
-cur.execute(base_query, query_fill_tuple)
+for row in cur.execute(base_query, query_fill_tuple):
+    cur_file_id = row['fileID']
+    cur_file_source_subdir = cur_file_id[0:2] # The two-character directory that the backup file is stored in. e.g. 'ef/ef0313281238123'
+    cur_file_relpath = row['relativePath']
+    cur_file_basename = cur_file_relpath.replace(archive_path_match_base,'')
 
-one_row = cur.fetchone()
-cur_file_id = one_row['fileID']
-cur_file_source_subdir = cur_file_id[0:2] # The two-character directory that the backup file is stored in. e.g. 'ef/ef0313281238123'
-cur_file_relpath = one_row['relativePath']
-cur_file_basename = cur_file_relpath.replace(archive_path_match_base,'')
+    print("\nFilename: " + row['relativePath'] + " - Hash/ID: " + row['fileID'])
 
-print("\nFilename: " + one_row['relativePath'] + " - Hash/ID: " + one_row['fileID'])
-
-source_file = Path(backup_base_path,cur_file_source_subdir,cur_file_id)
-file_info = os.stat(source_file)
-print(f'Target Name: {cur_file_basename} - File size: {file_info.st_size/1024/1024:.1f}MB')
+    source_file = Path(backup_base_path,cur_file_source_subdir,cur_file_id)
+    file_info = os.stat(source_file)
+    print(f'Target Name: {cur_file_basename} - File size: {file_info.st_size/1024/1024:.1f}MB')
 
 print("lol debug")
