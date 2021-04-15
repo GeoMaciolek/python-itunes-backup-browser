@@ -32,16 +32,14 @@ import os, sqlite3
 from pathlib import Path # So we can use sane, cross-patform paths
 from shutil import copyfile # So we can copy files, of course.
 
-"""
 if restore_timestamps_via_exif:
     from PIL import Image
     def get_date_taken(path): # A quick function to get the date
-        return Image.open(path).getexif()[36867]
-"""
+        #return Image.open(path).getexif()[36867]
+        return Image.open(path).getexif()#[306]   or - [36867]
 
 ## Functions
-verboseprint = print if (verbose or testmode) else lambda *a, **k: None # Prints if the "verbose" flag is true, otherwise nothing.
-
+verboseprint = print if verbose else lambda *a, **k: None # Prints if the "verbose" flag is true, otherwise nothing.
 
 ## Variable Initalization
 
@@ -89,12 +87,13 @@ for row in cur.execute(base_query, query_fill_tuple):
     
     verboseprint("\nFilename & Path: " + cur_file_relpath + " - Hash/ID: " + cur_file_id) # Print the info from the database as desired
     
-    source_file = Path(backup_base_path,cur_file_source_subdir,cur_file_id)
-    file_info = os.stat(source_file)
-    verboseprint(f'Target Name: {cur_file_basename} - File size: {file_info.st_size/1024/1024:.1f}MB')
-
+    # Set the full paths, based on the variously extracted variables
     full_source_file = Path(backup_base_path,cur_file_source_subdir,cur_file_id) # Essentially, /thebackup/a1b2b3b4-a134-eaa/3f/3fab37cd83e
     full_target_file = Path(restore_path,cur_file_basename)
+
+    file_info = os.stat(full_source_file)
+    verboseprint(f'Target Name: {cur_file_basename} - File size: {file_info.st_size/1024/1024:.1f}MB')
+
     verboseprint("Copying " + str(full_source_file) + " to " + str(full_target_file))
     if not testmode:
         copyfile(full_source_file, full_target_file) # Do the actual file copy
