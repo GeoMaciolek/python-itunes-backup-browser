@@ -73,9 +73,9 @@ cur = con.cursor()
 if (not debug_restore_file_count) or debug_restore_file_count == 0 or debug_restore_file_count == -1:
     limit_count = "-1"
 else:
-    limit_statement = str(debug_restore_file_count)
+    limit_count = str(debug_restore_file_count)
 
-query_fill_tuple=(archive_domain,archive_path_match_sql,limit_statement)
+query_fill_tuple=(archive_domain,archive_path_match_sql,limit_count)
 for row in cur.execute(base_query, query_fill_tuple):
     cur_file_id = row['fileID']
     cur_file_source_subdir = cur_file_id[0:2] # The two-character directory that the backup file is stored in. e.g. 'ef/ef0313281238123'
