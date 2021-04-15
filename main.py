@@ -30,6 +30,8 @@ base_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" 
 import os, sqlite3
 
 from pathlib import Path # So we can use sane, cross-patform paths
+from shutil import copyfile # So we can copy files, of course.
+
 """
 if restore_timestamps_via_exif:
     from PIL import Image
@@ -76,16 +78,27 @@ else:
     limit_count = str(debug_restore_file_count)
 
 query_fill_tuple=(archive_domain,archive_path_match_sql,limit_count)
+
+file_count=0
 for row in cur.execute(base_query, query_fill_tuple):
+    file_count+=1
     cur_file_id = row['fileID']
     cur_file_source_subdir = cur_file_id[0:2] # The two-character directory that the backup file is stored in. e.g. 'ef/ef0313281238123'
     cur_file_relpath = row['relativePath']
     cur_file_basename = cur_file_relpath.replace(archive_path_match_base,'')
     
-    verboseprint("\nFilename: " + row['relativePath'] + " - Hash/ID: " + row['fileID'])
+    verboseprint("\nFilename & Path: " + cur_file_relpath + " - Hash/ID: " + cur_file_id) # Print the info from the database as desired
     
     source_file = Path(backup_base_path,cur_file_source_subdir,cur_file_id)
     file_info = os.stat(source_file)
     verboseprint(f'Target Name: {cur_file_basename} - File size: {file_info.st_size/1024/1024:.1f}MB')
+
+    full_source_file = Path(backup_base_path,cur_file_source_subdir,cur_file_id) # Essentially, /thebackup/a1b2b3b4-a134-eaa/3f/3fab37cd83e
+    full_target_file = Path(restore_path,cur_file_basename)
+    verboseprint("Copying " + str(full_source_file) + " to " + str(full_target_file))
+    if not testmode:
+        copyfile(full_source_file, full_target_file) # Do the actual file copy
+
+verboseprint("File count: " + str(file_count))
 
 verboseprint("lol debug")
