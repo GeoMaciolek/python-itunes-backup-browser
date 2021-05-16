@@ -111,6 +111,12 @@ for row in cur.execute(base_query, query_fill_tuple):
             unix_time_int = int.from_bytes(date_bytes,"big") # Convert these bytes to an integer - the unix tyimestamp. Big endian encoding
             os.utime(full_target_file,(unix_time_int,unix_time_int))
 
+        ### Handle EXIF data - modify file timestamps appropriately
+        ## TODO: if (file matches appropriate file types):
+        if restore_timestamps_via_exif:
+            cur_file_exif_timestamp=get_date_taken(full_source_file)
+            verboseprint("EXIF date is: " + str(cur_file_exif_timestamp))
+
 verboseprint("File count: " + str(file_count))
 
 verboseprint("lol debug")
