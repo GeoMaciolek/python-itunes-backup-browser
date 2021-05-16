@@ -60,8 +60,8 @@ else:
 db_path = Path(backup_base_path,database_filename)
 
 # Just a little diagnostic info
-file_info = os.stat(db_path)
-verboseprint(f'DB Size: {file_info.st_size/1024/1024:.1f}MB')
+database_fileinfo = os.stat(db_path)
+verboseprint(f'DB Size: {database_fileinfo.st_size/1024/1024:.1f}MB')
 
 # 'Connect' to SQLite DB
 con = sqlite3.connect(db_path)
