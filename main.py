@@ -9,6 +9,7 @@ archive_path_match = 'Media/DCIM/100APPLE/%' # The beginning part ofthe archive 
 archive_domain = 'CameraRollDomain' # The archive domain - the application in question.
 
 # Other settings
+restore_timestamps_via_plistblob = True # We use the plist blob to try to recover timestamps now.
 restore_timestamps_via_exif = False # Try to use exif tags to restore file timestamps?
 exif_filetypes = ['jpg','jpeg','tif','tiff']
 debug_restore_file_count = 4 # Set to 0 or Null if not debugging!
@@ -23,8 +24,10 @@ database_filename = 'manifest.db' # SQLite DB filename
 
 #example_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE '%CameraRollDomain%' AND "relativePath" LIKE '%Media/DCIM/100APPLE/%' LIMIT 0, 15;'''
 
-base_query = '''SELECT "_rowid_",fileID,domain,relativePath FROM "main"."Files" WHERE "domain" LIKE ? AND "relativePath" LIKE ? LIMIT 0,?;'''
+base_query = '''SELECT "_rowid_",fileID,domain,relativePath,file FROM "main"."Files" WHERE "domain" LIKE ? AND "relativePath" LIKE ? LIMIT 0,?;'''
 
+plist_blob_find_bits = b'\x50\x72\x6f\x74\x65\x63\x74\x69\x6f\x6e\x43\x6c\x61\x73\x73\x12'
+date_bytelen=4 # 32 bit date information, we assume
 
 ## Imports (and related functions as needed)
 import os, sqlite3
@@ -97,6 +100,16 @@ for row in cur.execute(base_query, query_fill_tuple):
     verboseprint("Copying " + str(full_source_file) + " to " + str(full_target_file))
     if not testmode:
         copyfile(full_source_file, full_target_file) # Do the actual file copy
+        # Handling "file" blob data - this is an iOS "plist" file. We're going to seek to what we THINK
+        # is the right location in this binary data, to try to pull out a timestamp!
+        if restore_timestamps_via_plistblob:
+            cur_file_plistblob = row["file"]
+            magicstr_offset = cur_file_plistblob.find(plist_blob_find_bits)
+            blob_date_offset = magicstr_offset + len(plist_blob_find_bits)
+            date_bytes = cur_file_plistblob[blob_date_offset:blob_date_offset+date_bytelen]
+
+            unix_time_int = int.from_bytes(date_bytes,"big") # Convert these bytes to an integer - the unix tyimestamp. Big endian encoding
+            os.utime(full_target_file,(unix_time_int,unix_time_int))
 
 verboseprint("File count: " + str(file_count))
 
