@@ -5,7 +5,7 @@ backup_base_path = 'F:/3f01edfbff9f017dc2eb6ff5782333ad9d7278fe' # The path to y
 restore_path = 'F:/ipad_restore' # Where you want to restore the data.
 
 # Source archive (backup) details - as from the archive database. (Note: % is a SQL wildcard
-archive_path_match = 'Media/DCIM/100APPLE/%' # The beginning part ofthe archive path as defined in the backup, e.g. Media/DCIM/100APPLE/%
+archive_path_match = 'Media/DCIM/100APPLE/%' # The beginning part of the archive path as defined in the backup, e.g. Media/DCIM/100APPLE/%
 archive_domain = 'CameraRollDomain' # The archive domain - the application in question.
 
 # Other settings
@@ -44,7 +44,7 @@ if restore_timestamps_via_exif:
 ## Functions
 verboseprint = print if verbose else lambda *a, **k: None # Prints if the "verbose" flag is true, otherwise nothing.
 
-## Variable Initalization
+## Variable Initialization
 
 # Split off the archive_path_match string into two - one for cleaning up file names, one for the SQL query
 if not archive_path_match[-1] == '%':
