@@ -16,7 +16,7 @@ Arranged by rough priority
 
 ### Features
 
-* Use arguments/parameters rather than "edit my varibles"
+* Use arguments/parameters rather than "edit my variables"
 * Symbolic-link based "recovery" tree building
   * Can be implemented cross-platform using `os.symlink`
 * GUI?
